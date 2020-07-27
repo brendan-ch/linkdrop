@@ -1,11 +1,13 @@
 if(require('electron-squirrel-startup')) return;  // handle install operations
 
 const { app, BrowserWindow, shell, Tray, Menu, ipcMain } = require('electron');
+const os = require('os');
 const express = require('express');
 const server = express();
 const port = process.env.PORT || "19002";
 server.set("port", port);
 
+const iconPath = __dirname + (os.platform() === 'darwin' ? '/icons/favicon-16x16.png' : '/icons/favicon.ico');
 let tray = null;  // make sure tray is not garbage collected
 let win = null;  // assign win to var so we can refer to it later
 let isRunning = true;
@@ -34,7 +36,7 @@ ipcMain.on("setURL", (event, arg) => {
 
 const createWindow = () => {
   win = new BrowserWindow({
-    icon: __dirname + '/icons/favicon.ico',
+    icon: iconPath,
     width: 350,
     height: 500,
     frame: false,
@@ -50,13 +52,14 @@ const createWindow = () => {
 };
 
 const setTray = () => {
-  const iconPath = __dirname + '/icons/favicon.ico';
   tray = new Tray(iconPath);
 
   const contextMenu = Menu.buildFromTemplate([
     { label: "Open", type: "normal", click: () => {
       if (BrowserWindow.getAllWindows().length === 0) {
         createWindow();
+      } else {
+        win.show();
       }
     } },
     { label: "Quit", type: "normal", click: () => {
@@ -66,13 +69,15 @@ const setTray = () => {
 
   tray.setContextMenu(contextMenu);
   tray.setToolTip("Linkdrop");
-  tray.on("click", () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    } else {
-      win.show();  // show existing window instead of opening new one
-    }
-  });
+  if (os.platform === "win32") {
+    tray.on("click", () => {
+      if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow();
+      } else {
+        win.show();  // show existing window instead of opening new one
+      }
+    });
+  }
 }
 
 const runServer = () => {
