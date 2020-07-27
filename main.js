@@ -1,3 +1,5 @@
+if(require('electron-squirrel-startup')) return;  // handle install operations
+
 const { app, BrowserWindow, shell, Tray, Menu, ipcMain } = require('electron');
 const express = require('express');
 const server = express();
@@ -110,5 +112,10 @@ app.whenReady().then(() => {
 });
 
 app.on("window-all-closed", (event) => {
-  app.hide();  // app is still running in system tray (Windows)
-})
+  try {
+    app.hide();  // app is still running in system tray (Windows)
+  } catch (e) {
+    // console.log(e);
+    return;  // temporary "fix" for app not hiding correctly on Alt + F4
+  }
+});
