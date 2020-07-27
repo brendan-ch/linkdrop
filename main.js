@@ -69,7 +69,7 @@ const setTray = () => {
 
   tray.setContextMenu(contextMenu);
   tray.setToolTip("Linkdrop");
-  if (os.platform === "win32") {
+  if (os.platform() === "win32") {
     tray.on("click", () => {
       if (BrowserWindow.getAllWindows().length === 0) {
         createWindow();
