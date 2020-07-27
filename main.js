@@ -1,5 +1,4 @@
 const { app, BrowserWindow, shell, Tray, Menu, ipcMain } = require('electron');
-// const { runServer, setTray, createWindow } = require('./server.js');
 const express = require('express');
 const server = express();
 const port = process.env.PORT || "19002";
@@ -33,6 +32,7 @@ ipcMain.on("setURL", (event, arg) => {
 
 const createWindow = () => {
   win = new BrowserWindow({
+    icon: __dirname + '/icons/favicon.ico',
     width: 350,
     height: 500,
     frame: false,
@@ -48,7 +48,8 @@ const createWindow = () => {
 };
 
 const setTray = () => {
-  tray = new Tray("icons/favicon.ico");
+  const iconPath = __dirname + '/icons/favicon.ico';
+  tray = new Tray(iconPath);
 
   const contextMenu = Menu.buildFromTemplate([
     { label: "Open", type: "normal", click: () => {
