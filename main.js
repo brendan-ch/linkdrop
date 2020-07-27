@@ -104,11 +104,13 @@ const runServer = () => {
 };
 
 app.whenReady().then(() => {
-  runServer();
+  try {
+    runServer();
 
-  // createWindow();
-
-  setTray();
+    setTray();
+  } catch (e) {
+    console.log(e);
+  }
 });
 
 app.on("window-all-closed", (event) => {
