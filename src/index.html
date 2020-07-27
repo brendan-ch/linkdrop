@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<head>
+  <title>Send/Receive URLs</title>
+  <link href="index.css" rel="stylesheet">
+</head>
+
+<body>
+  <div class="header">
+    <div class="header-draggable"></div>
+    <p class="header-text text-button" onclick="closeWindow();">Close</p>
+  </div>
+  <div class="container">
+    <h3>Send URL</h3>
+    <div class="input-container">
+      <input class="input" id="url-input">
+      <button class="button send-button" id="send-button">Set</button>
+    </div>
+    <p id="input-status" class="input-status"></p>
+    <h3>Other options</h3>
+    <p class="text-button" onclick="toggleServer();">
+      Turn <span id="toggle-button-status"></span>
+    </p>
+  </div>
+  <script src="index.js"></script>
+</body>
