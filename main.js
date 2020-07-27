@@ -103,7 +103,7 @@ const runServer = () => {
 app.whenReady().then(() => {
   runServer();
 
-  createWindow();
+  // createWindow();
 
   setTray();
 });
