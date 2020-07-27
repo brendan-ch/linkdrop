@@ -2,7 +2,7 @@ const { app, BrowserWindow, shell, Tray, Menu, ipcMain } = require('electron');
 // const { runServer, setTray, createWindow } = require('./server.js');
 const express = require('express');
 const server = express();
-const port = process.env.PORT || "19001";
+const port = process.env.PORT || "19002";
 server.set("port", port);
 
 let tray = null;  // make sure tray is not garbage collected
@@ -62,13 +62,14 @@ const setTray = () => {
   ]);
 
   tray.setContextMenu(contextMenu);
+  tray.setToolTip("Linkdrop");
   tray.on("click", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
     } else {
       win.show();  // show existing window instead of opening new one
     }
-  })
+  });
 }
 
 const runServer = () => {
