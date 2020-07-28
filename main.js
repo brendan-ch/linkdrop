@@ -1,4 +1,4 @@
-if(require('electron-squirrel-startup')) return;  // handle install operations
+if(require('electron-squirrel-startup')) return;  // handle install operations because I'm a lazy piece of shit
 
 const { app, BrowserWindow, shell, Tray, Menu, ipcMain, dialog } = require('electron');
 const { getConfig, setConfig } = require('./config');
@@ -13,46 +13,49 @@ let config = getConfig();
 let port = process.env.PORT || config ? config.port : null || "19002";
 server.set("port", port);  // port is only set once
 
+// icon path is dependent on platform (macOS doesn't like .ico)
 const iconPath = __dirname + (os.platform() === 'darwin' ? '/icons/favicon-16x16.png' : '/icons/favicon.ico');
 let tray = null;  // make sure tray is not garbage collected
 let win = null;  // assign win to var so we can refer to it later
-let isRunning = true;
+let isRunning = true;  // determines whether requests open URLs or not
 let sendURL = "";  // empty on initialization
 
-ipcMain.on("getIP", (event, arg) => {
-  event.returnValue = ip.address("public", "ipv4");
-});
-
-ipcMain.on("getPort", (event, arg) => {
-  event.returnValue = port;
-});
-
-ipcMain.on("setPort", (event, arg) => {
-  setConfig({...config, port: arg});
-  port = arg;
-  event.returnValue = port;
-})
-
-ipcMain.on("getIsRunning", (event, arg) => {
-  event.returnValue = isRunning;
-});
-
-ipcMain.on("toggleIsRunning", (event, arg) => {
-  isRunning = !isRunning;
-  console.log(`isRunning set to ${isRunning}.`)
-  event.returnValue = isRunning;
-});
-
-ipcMain.on("getURL", (event, arg) => {
-  event.returnValue = sendURL;
-});
-
-ipcMain.on("setURL", (event, arg) => {
-  sendURL = arg;
-  console.log(`Set URL to ${sendURL}`);
-
-  event.returnValue = sendURL;
-});
+const setIpc = () => {
+  ipcMain.on("getIP", (event, arg) => {
+    event.returnValue = ip.address("public", "ipv4");
+  });
+  
+  ipcMain.on("getPort", (event, arg) => {
+    event.returnValue = port;
+  });
+  
+  ipcMain.on("setPort", (event, arg) => {
+    setConfig({...config, port: arg});
+    port = arg;
+    event.returnValue = port;
+  })
+  
+  ipcMain.on("getIsRunning", (event, arg) => {
+    event.returnValue = isRunning;
+  });
+  
+  ipcMain.on("toggleIsRunning", (event, arg) => {
+    isRunning = !isRunning;
+    console.log(`isRunning set to ${isRunning}.`)
+    event.returnValue = isRunning;
+  });
+  
+  ipcMain.on("getURL", (event, arg) => {
+    event.returnValue = sendURL;
+  });
+  
+  ipcMain.on("setURL", (event, arg) => {
+    sendURL = arg;
+    console.log(`Set URL to ${sendURL}`);
+  
+    event.returnValue = sendURL;
+  });
+}
 
 const createWindow = () => {
   win = new BrowserWindow({
@@ -101,11 +104,12 @@ const setTray = () => {
 }
 
 const runServer = async () => {
+  // receive URL from phone
   server.post('/receiveurl', (req, res) => {
     if (isRunning) {
       console.log(`URL received: ${req.headers.url}`);
 
-      shell.openExternal(req.headers.url);
+      shell.openExternal(req.headers.url);  // open URL in default browser
 
       res.sendStatus(200);
     } else {
@@ -113,13 +117,14 @@ const runServer = async () => {
     }
   });
 
+  // send URL to phone
   server.get("/geturl", (req, res) => {
     if (isRunning && sendURL !== "") {
       res.send({
         "url": sendURL
       });
     } else {
-      res.sendStatus(404);
+      res.sendStatus(404);  // URL not found
     }
   })
 
@@ -130,7 +135,7 @@ const runServer = async () => {
       type: "info",
       message: `There is already something running on port ${port}. The app will now close.`
     })
-    app.quit();  // application is already running
+    app.quit();  // something is already running on port; gracefully close application
   } else {
     server.listen(port, () => {  // this will cause error if port is unavailable
       console.log(`Listening on port ${port}`);
@@ -138,6 +143,8 @@ const runServer = async () => {
   };
 };
 
+// gets the status of configured port
+// returns promise because checkPortStatus is asynchronous (?)
 const checkPort = async (port) => {
   const status = new Promise((resolve, reject) => {
     portscanner.checkPortStatus(port, '127.0.0.1', (error, status) => {
@@ -153,18 +160,19 @@ const checkPort = async (port) => {
 }
 
 app.whenReady().then(() => {
-  // if no config returned, create new config file
+  // if config is undefined, create new config file
   if (!getConfig()) {
     console.log("No config detected, creating new config...");
     setConfig({
       port: port,
     });
   };
-  
-  runServer();
 
-  setTray();
+  setIpc();  // set interactions between main process and renderer
   
+  runServer();  // run express server to get/send URLs
+
+  setTray();  // set the tray icon
 });
 
 app.on("window-all-closed", (event) => {
