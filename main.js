@@ -1,9 +1,10 @@
 if(require('electron-squirrel-startup')) return;  // handle install operations
 
-const { app, BrowserWindow, shell, Tray, Menu, ipcMain } = require('electron');
+const { app, BrowserWindow, shell, Tray, Menu, ipcMain, dialog } = require('electron');
 const { getConfig, setConfig } = require('./config');
 const os = require('os');
 const ip = require('ip');
+const portscanner = require('portscanner');
 const express = require('express');
 const server = express();
 let config = getConfig();
@@ -99,7 +100,7 @@ const setTray = () => {
   }
 }
 
-const runServer = () => {
+const runServer = async () => {
   server.post('/receiveurl', (req, res) => {
     if (isRunning) {
       console.log(`URL received: ${req.headers.url}`);
@@ -122,10 +123,34 @@ const runServer = () => {
     }
   })
 
-  server.listen(port, () => {
-    console.log(`Listening on port ${port}`);
-  });
+  const status = await checkPort(port);
+
+  if (status === 'open') {
+    dialog.showMessageBoxSync(null, {
+      type: "info",
+      message: `There is already something running on port ${port}. The app will now close.`
+    })
+    app.quit();  // application is already running
+  } else {
+    server.listen(port, () => {  // this will cause error if port is unavailable
+      console.log(`Listening on port ${port}`);
+    });
+  };
 };
+
+const checkPort = async (port) => {
+  const status = new Promise((resolve, reject) => {
+    portscanner.checkPortStatus(port, '127.0.0.1', (error, status) => {
+      if (error) {
+        reject(error);
+      } else {
+        resolve(status);
+      }
+    })
+  });
+
+  return status;
+}
 
 app.whenReady().then(() => {
   // if no config returned, create new config file
@@ -135,14 +160,11 @@ app.whenReady().then(() => {
       port: port,
     });
   };
+  
+  runServer();
 
-  try {
-    runServer();
-
-    setTray();
-  } catch (e) {
-    console.log(e);
-  }
+  setTray();
+  
 });
 
 app.on("window-all-closed", (event) => {
