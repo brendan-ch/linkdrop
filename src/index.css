@@ -44,24 +44,38 @@ body {
 }
 
 .input-container {
-  height: 40px;
-  width: 250px;
   display: flex;
   flex-direction: row;
   border-radius: 5px;
+  min-width: 80px;
+}
+
+.url-input-container {
+  height: 40px;
+  width: 250px;
 }
 
 .input {
   display: flex;
   flex: 1;
+  min-width: 10px;
   background-color: #141414;
   border: none;
-  border-top-left-radius: 5px;
-  border-bottom-left-radius: 5px;
   outline: none;
   color: white;
   text-indent: 5px;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+input::-webkit-outer-spin-button,  /* remove arrows */
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.url-input {
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
 }
 
 .button {
@@ -84,6 +98,30 @@ body {
 .input-status {
   text-align: center;
   width: 80%;
+}
+
+.ip-container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  width: 200px;
+  height: 40px;
+}
+
+.ip-text-container {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.port-input-container {
+  display: flex;
+  flex: 1;
+}
+
+.port-input {
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
 }
 
 .text-button {

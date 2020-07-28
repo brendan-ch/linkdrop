@@ -11,11 +11,23 @@
   </div>
   <div class="container">
     <h3>Send URL</h3>
-    <div class="input-container">
-      <input class="input" id="url-input">
-      <button class="button send-button" id="send-button">Set</button>
+    <div class="input-container url-input-container">
+      <input onsubmit="sendURL();" type="url" placeholder="URL" class="input url-input" id="url-input">
+      <button onclick="sendURL();" class="button send-button" id="send-button">Set</button>
     </div>
     <p id="input-status" class="input-status"></p>
+    <h3>Server IP</h3>
+    <div class="ip-container">
+      <div class="ip-text-container">
+        <p id="server-ip"></p>
+        <p>:</p>
+      </div>
+      <div class="input-container port-input-container">
+        <input type="number" placeholder="Port" class="input port-input" id="port-input">
+        <button onclick="sendPort();" class="button send-button" id="set-port-button">Set</button>
+      </div>
+    </div>
+    <p class="input-status" id="port-input-status" ></p>
     <h3>Other options</h3>
     <p class="text-button" onclick="toggleServer();">
       Turn <span id="toggle-button-status"></span>
