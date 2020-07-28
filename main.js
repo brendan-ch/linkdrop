@@ -1,17 +1,36 @@
 if(require('electron-squirrel-startup')) return;  // handle install operations
 
 const { app, BrowserWindow, shell, Tray, Menu, ipcMain } = require('electron');
+const { getConfig, setConfig } = require('./config');
 const os = require('os');
+const ip = require('ip');
 const express = require('express');
 const server = express();
-const port = process.env.PORT || "19002";
-server.set("port", port);
+let config = getConfig();
+
+// port is only set once; also shows up in UI
+let port = process.env.PORT || config ? config.port : null || "19002";
+server.set("port", port);  // port is only set once
 
 const iconPath = __dirname + (os.platform() === 'darwin' ? '/icons/favicon-16x16.png' : '/icons/favicon.ico');
 let tray = null;  // make sure tray is not garbage collected
 let win = null;  // assign win to var so we can refer to it later
 let isRunning = true;
 let sendURL = "";  // empty on initialization
+
+ipcMain.on("getIP", (event, arg) => {
+  event.returnValue = ip.address("public", "ipv4");
+});
+
+ipcMain.on("getPort", (event, arg) => {
+  event.returnValue = port;
+});
+
+ipcMain.on("setPort", (event, arg) => {
+  setConfig({...config, port: arg});
+  port = arg;
+  event.returnValue = port;
+})
 
 ipcMain.on("getIsRunning", (event, arg) => {
   event.returnValue = isRunning;
@@ -25,14 +44,14 @@ ipcMain.on("toggleIsRunning", (event, arg) => {
 
 ipcMain.on("getURL", (event, arg) => {
   event.returnValue = sendURL;
-})
+});
 
 ipcMain.on("setURL", (event, arg) => {
   sendURL = arg;
   console.log(`Set URL to ${sendURL}`);
 
   event.returnValue = sendURL;
-})
+});
 
 const createWindow = () => {
   win = new BrowserWindow({
@@ -109,6 +128,14 @@ const runServer = () => {
 };
 
 app.whenReady().then(() => {
+  // if no config returned, create new config file
+  if (!getConfig()) {
+    console.log("No config detected, creating new config...");
+    setConfig({
+      port: port,
+    });
+  };
+
   try {
     runServer();
 
