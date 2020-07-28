@@ -4,3 +4,6 @@ node_modules
 # installer + package
 Linkdrop-win32-x64
 installer
+
+# config (so that changes don't get pushed)
+config.json
