@@ -16,6 +16,7 @@ if (config === undefined) {
     allowReceiveInBackground: false,
     openWithNotification: true,
     openWindowOnStartup: true,
+    quitOnClose: true,
   };
 
   console.log("No config detected. Creating new one...");
@@ -213,9 +214,13 @@ app.whenReady().then(() => {
 
 app.on("window-all-closed", (event) => {
   try {
-    isRunning = !isRunning ? isRunning : config.allowReceiveInBackground;
-    sendURL = "";
-    app.hide();  // app is still running in system tray (Windows)
+    if (config.quitOnClose) {
+      app.quit();
+    } else {
+      isRunning = !isRunning ? isRunning : config.allowReceiveInBackground;
+      sendURL = "";
+      app.hide();  // app is still running in system tray (Windows)
+    }
   } catch (e) {
     // console.log(e);
     return;  // temporary "fix" for app not hiding correctly on Alt + F4
