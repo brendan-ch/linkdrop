@@ -1,7 +1,7 @@
 if(require('electron-squirrel-startup')) return;  // handle install operations because I'm a lazy piece of shit
 
 const { app, BrowserWindow, shell, Tray, Menu, ipcMain, dialog, Notification } = require('electron');
-const { getConfig, setConfig, configPath } = require('./config');
+const { setConfig, checkConfig, configPath } = require('./config');
 const os = require('os');
 const ip = require('ip');
 const portscanner = require('portscanner');
@@ -9,20 +9,8 @@ const express = require('express');
 const server = express();
 server.use(express.json());
 
-let config = getConfig();
-if (config === undefined) {
-  config = {
-    port: "19002",
-    allowReceiveInBackground: false,
-    openWithNotification: true,
-    openWindowOnStartup: true,
-    quitOnClose: true,
-  };
-
-  console.log("No config detected. Creating new one...");
-
-  setConfig(config);
-}
+const config = checkConfig();
+setConfig(config);
 
 // port is only set once; also shows up in UI
 let port = process.env.PORT || config ? config.port : null || "19002";
