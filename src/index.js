@@ -16,6 +16,19 @@ const portInputStatus = document.getElementById("port-input-status");
 const portInput = document.getElementById("port-input");
 portInput.value = ipcRenderer.sendSync("getPort");
 
+window.addEventListener("keydown", (event) => {
+  if (event.ctrlKey && event.key === ",") {
+    openConfig();
+  }
+
+  return;
+});
+
+const openConfig = () => {
+  ipcRenderer.sendSync("openConfig");
+  return;
+}
+
 const updateStatus = () => {
   toggleButtonStatus.innerHTML = ipcRenderer.sendSync("getIsRunning") ? 
     "Cancel" 

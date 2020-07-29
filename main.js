@@ -13,7 +13,9 @@ let config = getConfig();
 if (config === undefined) {
   config = {
     port: "19002",
-    runInBackground: false,
+    allowReceiveInBackground: false,
+    openWithNotification: true,
+    openWindowOnStartup: true,
   };
 
   console.log("No config detected. Creating new one...");
@@ -37,9 +39,14 @@ let sendURL = "";
 
 // determines whether requests open URLs or not
 // user must manually turn on
-let isRunning = config.runInBackground;
+let isRunning = config.allowReceiveInBackground;
 
 const setIpc = () => {
+  ipcMain.on("openConfig", (event, arg) => {
+    shell.openPath("config.json");
+    event.returnValue = undefined;
+  })
+  
   ipcMain.on("getIP", (event, arg) => {
     event.returnValue = ip.address("public", "ipv4");
   });
@@ -128,17 +135,21 @@ const runServer = async () => {
     if (isRunning && req.body.deviceName !== undefined) {
       console.log(`URL received from ${req.body.deviceName}: ${req.body.url}`);
 
-      const notification = new Notification({
-        title: `New URL from ${req.body.deviceName}`,
-        body: req.body.url,
-        // icon: iconPath,
-      });
+      if (config.openWithNotification) {
+        const notification = new Notification({
+          title: `New URL from ${req.body.deviceName}`,
+          body: req.body.url,
+          // icon: iconPath,
+        });
 
-      notification.addListener("click", () => {
+        notification.addListener("click", () => {
+          shell.openExternal(req.body.url);  // open URL in default browser
+        });
+
+        notification.show();
+      } else {
         shell.openExternal(req.body.url);  // open URL in default browser
-      });
-
-      notification.show();
+      }
 
       res.sendStatus(200);
     } else {
@@ -194,11 +205,15 @@ app.whenReady().then(() => {
   runServer();  // run express server to get/send URLs
 
   setTray();  // set the tray icon
+
+  if (config.openWindowOnStartup) {
+    createWindow();
+  }
 });
 
 app.on("window-all-closed", (event) => {
   try {
-    isRunning = !isRunning ? isRunning : config.runInBackground;
+    isRunning = !isRunning ? isRunning : config.allowReceiveInBackground;
     sendURL = "";
     app.hide();  // app is still running in system tray (Windows)
   } catch (e) {
