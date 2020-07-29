@@ -1,6 +1,6 @@
 if(require('electron-squirrel-startup')) return;  // handle install operations because I'm a lazy piece of shit
 
-const { app, BrowserWindow, shell, Tray, Menu, ipcMain, dialog, Notification } = require('electron');
+const { app, BrowserWindow, shell, Tray, Menu, ipcMain, dialog, Notification, clipboard } = require('electron');
 const { setConfig, checkConfig, configPath } = require('./config');
 const os = require('os');
 const ip = require('ip');
@@ -29,6 +29,22 @@ let sendURL = "";
 // determines whether requests open URLs or not
 // user must manually turn on
 let isRunning = config.allowReceiveInBackground;
+
+const openURL = (link) => {
+  if (config.copyLinkToClipboard) {
+    const clipboardNotification = new Notification({
+      "title": "Link copied to clipboard",
+      "body": link,
+      "silent": true,
+    });
+
+    clipboardNotification.show();
+
+    clipboard.writeText(link);
+  } else {
+    shell.openExternal(link);  // open URL in default browser
+  };
+}
 
 const setIpc = () => {
   ipcMain.on("openConfig", (event, arg) => {
@@ -132,12 +148,12 @@ const runServer = async () => {
         });
 
         notification.addListener("click", () => {
-          shell.openExternal(req.body.url);  // open URL in default browser
+          openURL(req.body.url);
         });
 
         notification.show();
       } else {
-        shell.openExternal(req.body.url);  // open URL in default browser
+        openURL(req.body.url);
       }
 
       res.sendStatus(200);
