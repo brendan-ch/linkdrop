@@ -1,25 +1,26 @@
 <!DOCTYPE html>
 <head>
   <title>Linkdrop</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'">
   <link href="index.css" rel="stylesheet">
 </head>
 
 <body>
   <div class="header">
     <div class="header-draggable"></div>
-    <p class="header-text text-button" onclick="closeWindow();">Close</p>
+    <p class="header-text text-button" id="close-button">Close</p>
   </div>
   <div class="container">
     <h3>Send URL</h3>
     <div class="input-container url-input-container">
-      <input onsubmit="sendURL();" type="url" placeholder="URL" class="input url-input" id="url-input">
-      <button onclick="sendURL();" class="button send-button" id="send-button">Set</button>
+      <input type="url" placeholder="URL" class="input url-input" id="url-input">
+      <button class="button send-button" id="send-button">Set</button>
     </div>
     <p id="input-status" class="input-status"></p>
     <h3>Get URL</h3>
     <div class="get-url-container">
-      <p id="server-status" style="margin-right: 5px;"></p>
-      <p id="toggle-button-status" class="text-button" onclick="toggleServer();"></p>
+      <p id="server-status"></p>
+      <p id="toggle-button-status" class="text-button"></p>
     </div>
     
     <h3>Server IP</h3>
@@ -30,7 +31,7 @@
       </div>
       <div class="input-container port-input-container">
         <input type="number" placeholder="Port" class="input port-input" id="port-input">
-        <button onclick="sendPort();" class="button send-button" id="set-port-button">Set</button>
+        <button class="button send-button" id="send-port-button">Set</button>
       </div>
     </div>
     <p class="input-status" id="port-input-status" ></p>

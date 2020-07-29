@@ -2,20 +2,6 @@
 
 const { ipcRenderer } = require('electron');
 
-const serverIP = document.getElementById("server-ip");
-serverIP.innerHTML = ipcRenderer.sendSync("getIP");
-
-const toggleButtonStatus = document.getElementById('toggle-button-status');
-const serverStatus = document.getElementById("server-status");
-
-const inputStatus = document.getElementById("input-status");
-const urlInput = document.getElementById("url-input");
-urlInput.value = ipcRenderer.sendSync("getURL");
-
-const portInputStatus = document.getElementById("port-input-status");
-const portInput = document.getElementById("port-input");
-portInput.value = ipcRenderer.sendSync("getPort");
-
 window.addEventListener("keydown", (event) => {
   if (event.ctrlKey && event.key === ",") {
     openConfig();
@@ -23,6 +9,49 @@ window.addEventListener("keydown", (event) => {
 
   return;
 });
+
+const closeButton = document.getElementById("close-button")
+closeButton.addEventListener("click", (event) => {
+  closeWindow();
+});
+
+const serverIP = document.getElementById("server-ip");
+serverIP.innerHTML = ipcRenderer.sendSync("getIP");
+
+const toggleButtonStatus = document.getElementById('toggle-button-status');
+toggleButtonStatus.addEventListener("click", (event) => {
+  toggleServer();
+});
+
+const serverStatus = document.getElementById("server-status");
+
+const inputStatus = document.getElementById("input-status");
+const urlInput = document.getElementById("url-input");
+urlInput.value = ipcRenderer.sendSync("getURL");
+urlInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    sendURL();
+  }
+})
+
+const sendButton = document.getElementById("send-button");
+sendButton.addEventListener("click", (event) => {
+  sendURL();
+})
+
+const portInputStatus = document.getElementById("port-input-status");
+const portInput = document.getElementById("port-input");
+portInput.value = ipcRenderer.sendSync("getPort");
+portInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") {
+    sendPort();
+  }
+})
+
+const sendPortButton = document.getElementById("send-port-button");
+sendPortButton.addEventListener("click", (event) => {
+  sendPort();
+})
 
 const openConfig = () => {
   ipcRenderer.sendSync("openConfig");

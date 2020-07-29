@@ -89,7 +89,7 @@ const createWindow = () => {
     width: 350,
     height: 500,
     frame: false,
-    resizable: false,  // set to true if devtools
+    // resizable: false,  // set to true if devtools
     webPreferences: {
       nodeIntegration: true,
     }
@@ -97,7 +97,7 @@ const createWindow = () => {
 
   win.loadFile('src/index.html');
 
-  // win.webContents.openDevTools();
+  win.webContents.openDevTools();
 };
 
 const setTray = () => {

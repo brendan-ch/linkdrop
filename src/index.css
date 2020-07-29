@@ -129,6 +129,10 @@ input::-webkit-inner-spin-button {
   flex-direction: row;
 }
 
+#server-status {
+  margin-right: 5px;
+}
+
 .text-button {
   text-decoration: underline;
 }
