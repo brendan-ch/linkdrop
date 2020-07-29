@@ -31,5 +31,6 @@ Linkdrop generates a `config.json` file on first start, which can be opened by p
 - `allowReceiveInBackground` (boolean): If set to `true`, allows the receiving of URLs when the app window is closed. Defaults to `false`.
 - `openWithNotification` (boolean): If set to `true`, displays a system notification when a URL is received, instead of opening the URL automatically. Defaults to `true`.
 - `openWindowOnStartup` (boolean): If set to `true`, opens the app window when Linkdrop is launched. Defaults to `true`.
+- `quitOnClose` (boolean): If set to `true`, quits Linkdrop and shuts down the server on window close, instead of hiding the app to the tray. Defaults to `true`.
 
 Icon is [Link icon by Icons8](https://icons8.com/icons/set/link).
