@@ -16,6 +16,12 @@
       <button onclick="sendURL();" class="button send-button" id="send-button">Set</button>
     </div>
     <p id="input-status" class="input-status"></p>
+    <h3>Get URL</h3>
+    <div class="get-url-container">
+      <p id="server-status" style="margin-right: 5px;"></p>
+      <p id="toggle-button-status" class="text-button" onclick="toggleServer();"></p>
+    </div>
+    
     <h3>Server IP</h3>
     <div class="ip-container">
       <div class="ip-text-container">
@@ -28,10 +34,6 @@
       </div>
     </div>
     <p class="input-status" id="port-input-status" ></p>
-    <h3>Other options</h3>
-    <p class="text-button" onclick="toggleServer();">
-      Turn <span id="toggle-button-status"></span>
-    </p>
   </div>
   <script src="index.js"></script>
 </body>

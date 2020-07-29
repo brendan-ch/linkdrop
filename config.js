@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 const setConfig = async (config = {}) => {
-  const data = JSON.stringify(config);
+  const data = JSON.stringify(config, null, 2);
 
   const promise = new Promise((resolve, reject) => {
     fs.writeFile("config.json", data, (error) => {

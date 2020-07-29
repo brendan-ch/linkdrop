@@ -1,13 +1,25 @@
 if(require('electron-squirrel-startup')) return;  // handle install operations because I'm a lazy piece of shit
 
-const { app, BrowserWindow, shell, Tray, Menu, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, shell, Tray, Menu, ipcMain, dialog, Notification } = require('electron');
 const { getConfig, setConfig } = require('./config');
 const os = require('os');
 const ip = require('ip');
 const portscanner = require('portscanner');
 const express = require('express');
 const server = express();
+server.use(express.json());
+
 let config = getConfig();
+if (config === undefined) {
+  config = {
+    port: "19002",
+    runInBackground: false,
+  };
+
+  console.log("No config detected. Creating new one...");
+
+  setConfig(config);
+}
 
 // port is only set once; also shows up in UI
 let port = process.env.PORT || config ? config.port : null || "19002";
@@ -17,8 +29,15 @@ server.set("port", port);  // port is only set once
 const iconPath = __dirname + (os.platform() === 'darwin' ? '/icons/favicon-16x16.png' : '/icons/favicon.ico');
 let tray = null;  // make sure tray is not garbage collected
 let win = null;  // assign win to var so we can refer to it later
-let isRunning = true;  // determines whether requests open URLs or not
-let sendURL = "";  // empty on initialization
+
+// determines what url is sent to phone
+// also determines whether url is sent to phone
+// empty on initialization
+let sendURL = "";
+
+// determines whether requests open URLs or not
+// user must manually turn on
+let isRunning = config.runInBackground;
 
 const setIpc = () => {
   ipcMain.on("getIP", (event, arg) => {
@@ -40,7 +59,7 @@ const setIpc = () => {
   });
   
   ipcMain.on("toggleIsRunning", (event, arg) => {
-    isRunning = !isRunning;
+    isRunning = arg !== undefined ? arg : !isRunning;
     console.log(`isRunning set to ${isRunning}.`)
     event.returnValue = isRunning;
   });
@@ -106,10 +125,20 @@ const setTray = () => {
 const runServer = async () => {
   // receive URL from phone
   server.post('/receiveurl', (req, res) => {
-    if (isRunning) {
-      console.log(`URL received: ${req.headers.url}`);
+    if (isRunning && req.body.deviceName !== undefined) {
+      console.log(`URL received from ${req.body.deviceName}: ${req.body.url}`);
 
-      shell.openExternal(req.headers.url);  // open URL in default browser
+      const notification = new Notification({
+        title: `New URL from ${req.body.deviceName}`,
+        body: req.body.url,
+        // icon: iconPath,
+      });
+
+      notification.addListener("click", () => {
+        shell.openExternal(req.body.url);  // open URL in default browser
+      });
+
+      notification.show();
 
       res.sendStatus(200);
     } else {
@@ -119,7 +148,7 @@ const runServer = async () => {
 
   // send URL to phone
   server.get("/geturl", (req, res) => {
-    if (isRunning && sendURL !== "") {
+    if (sendURL !== "") {
       res.send({
         "url": sendURL
       });
@@ -160,14 +189,6 @@ const checkPort = async (port) => {
 }
 
 app.whenReady().then(() => {
-  // if config is undefined, create new config file
-  if (!getConfig()) {
-    console.log("No config detected, creating new config...");
-    setConfig({
-      port: port,
-    });
-  };
-
   setIpc();  // set interactions between main process and renderer
   
   runServer();  // run express server to get/send URLs
@@ -177,6 +198,8 @@ app.whenReady().then(() => {
 
 app.on("window-all-closed", (event) => {
   try {
+    isRunning = !isRunning ? isRunning : config.runInBackground;
+    sendURL = "";
     app.hide();  // app is still running in system tray (Windows)
   } catch (e) {
     // console.log(e);
