@@ -1,7 +1,7 @@
 if(require('electron-squirrel-startup')) return;  // handle install operations because I'm a lazy piece of shit
 
 const { app, BrowserWindow, shell, Tray, Menu, ipcMain, dialog, Notification } = require('electron');
-const { getConfig, setConfig } = require('./config');
+const { getConfig, setConfig, configPath } = require('./config');
 const os = require('os');
 const ip = require('ip');
 const portscanner = require('portscanner');
@@ -44,7 +44,7 @@ let isRunning = config.allowReceiveInBackground;
 
 const setIpc = () => {
   ipcMain.on("openConfig", (event, arg) => {
-    shell.openPath("config.json");
+    shell.openPath(configPath);
     event.returnValue = undefined;
   })
   
