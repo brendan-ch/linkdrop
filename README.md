@@ -12,7 +12,9 @@ Easily send and receive URLs between your PC and iPhone.
 
 **Download on PC (required for shortcuts to work):**
 
-Link coming soon
+[Download here](https://github.com/unnameduser95/linkdrop/releases)
+
+Run Setup.exe to install Linkdrop.
 
 ## Usage
 
