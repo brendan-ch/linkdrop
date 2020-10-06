@@ -17,7 +17,7 @@
     "portscanner": "^2.2.0"
   },
   "devDependencies": {
-    "electron": "^9.1.1",
+    "electron": "^9.3.1",
     "electron-packager": "^15.0.0",
     "electron-winstaller": "^4.0.1"
   }
