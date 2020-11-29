@@ -21,9 +21,7 @@ const iconPath = __dirname + (os.platform() === 'darwin' ? '/icons/favicon-16x16
 let tray = null;  // make sure tray is not garbage collected
 let win = null;  // assign win to var so we can refer to it later
 
-// determines what url is sent to phone
-// also determines whether url is sent to phone
-// empty on initialization
+// determines what url is sent to phone/whether url is sent to phone
 let sendURL = "";
 
 // determines whether requests open URLs or not
@@ -32,6 +30,7 @@ let isRunning = config.allowReceiveInBackground;
 
 const openURL = (link) => {
   if (config.copyLinkToClipboard) {
+    // show a notification when link gets copied to clipboard
     const clipboardNotification = new Notification({
       "title": "Link copied to clipboard",
       "body": link,
@@ -46,40 +45,52 @@ const openURL = (link) => {
   };
 }
 
+// this sets the IPC listeners, which handles interactions between main process and renderer
+// run on startup
 const setIpc = () => {
+  // opens config.json in the user's default text editor
+  // triggered by pressing Ctrl + , in the app window
   ipcMain.on("openConfig", (event, arg) => {
     shell.openPath(configPath);
     event.returnValue = undefined;
-  })
+  });
   
+  // returns the local IP address of the PC
   ipcMain.on("getIP", (event, arg) => {
     event.returnValue = ip.address("public", "ipv4");
   });
   
+  // returns the port that the server is running on
   ipcMain.on("getPort", (event, arg) => {
     event.returnValue = port;
   });
   
+  // sets the port of the server; changes apply on restart
+  // port variable is changed so that it is returned and shows up in the UI
   ipcMain.on("setPort", (event, arg) => {
     setConfig({...config, port: arg});
     port = arg;
     event.returnValue = port;
-  })
-  
+  });
+
+  // return whether server is allowed to receive URLs
   ipcMain.on("getIsRunning", (event, arg) => {
     event.returnValue = isRunning;
   });
   
+  // toggle/set (if arg provided) whether server is allowed to receive URLs
   ipcMain.on("toggleIsRunning", (event, arg) => {
     isRunning = arg !== undefined ? arg : !isRunning;
     console.log(`isRunning set to ${isRunning}.`)
     event.returnValue = isRunning;
   });
   
+  // return the current sendURL
   ipcMain.on("getURL", (event, arg) => {
     event.returnValue = sendURL;
   });
   
+  // set the sendURL
   ipcMain.on("setURL", (event, arg) => {
     sendURL = arg;
     console.log(`Set URL to ${sendURL}`);
@@ -88,6 +99,8 @@ const setIpc = () => {
   });
 }
 
+// opens and loads the app window
+// run on startup
 const createWindow = () => {
   win = new BrowserWindow({
     icon: iconPath,
@@ -105,6 +118,7 @@ const createWindow = () => {
   // win.webContents.openDevTools();
 };
 
+// create the tray icon; run once on startup
 const setTray = () => {
   tray = new Tray(iconPath);
 
@@ -120,9 +134,12 @@ const setTray = () => {
       app.quit();
     }}
   ]);
-
   tray.setContextMenu(contextMenu);
+  
+  // set what comes up on mouse hover
   tray.setToolTip("Linkdrop");
+
+  // click will only work consistently on windows
   if (os.platform() === "win32") {
     tray.on("click", () => {
       if (BrowserWindow.getAllWindows().length === 0) {
