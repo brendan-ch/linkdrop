@@ -11,14 +11,13 @@
   "author": "unnameduser95",
   "license": "ISC",
   "dependencies": {
-    "electron-squirrel-startup": "^1.0.0",
-    "express": "^4.17.1",
-    "ip": "^1.1.5",
+    "electron-squirrel-startup": "^1.0.1",
+    "express": "^5.1.0",
     "portscanner": "^2.2.0"
   },
   "devDependencies": {
-    "electron": "^9.1.1",
-    "electron-packager": "^15.0.0",
-    "electron-winstaller": "^4.0.1"
+    "@electron/packager": "^18.3.2",
+    "electron": "^38.2.2",
+    "electron-winstaller": "^5.4.0"
   }
 }
