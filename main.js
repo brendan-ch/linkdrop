@@ -3,7 +3,6 @@ if(require('electron-squirrel-startup')) return;  // handle install operations b
 const { app, BrowserWindow, shell, Tray, Menu, ipcMain, dialog, Notification, clipboard } = require('electron');
 const { setConfig, checkConfig, configPath } = require('./config');
 const os = require('os');
-const ip = require('ip');
 const portscanner = require('portscanner');
 const express = require('express');
 const server = express();
@@ -46,6 +45,24 @@ const openURL = (link) => {
   };
 }
 
+const getLocalIPv4Address = () => {
+  const interfaces = os.networkInterfaces();
+
+  for (const addresses of Object.values(interfaces)) {
+    if (!addresses) {
+      continue;
+    }
+
+    for (const details of addresses) {
+      if (details.family === 'IPv4' && !details.internal) {
+        return details.address;
+      }
+    }
+  }
+
+  return undefined;
+};
+
 const setIpc = () => {
   ipcMain.on("openConfig", (event, arg) => {
     shell.openPath(configPath);
@@ -53,7 +70,7 @@ const setIpc = () => {
   })
   
   ipcMain.on("getIP", (event, arg) => {
-    event.returnValue = ip.address("public", "ipv4");
+    event.returnValue = getLocalIPv4Address();
   });
   
   ipcMain.on("getPort", (event, arg) => {
@@ -97,6 +114,7 @@ const createWindow = () => {
     resizable: false,  // set to true if devtools
     webPreferences: {
       nodeIntegration: true,
+      contextIsolation: false,
     }
   });
 
